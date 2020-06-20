@@ -110,8 +110,6 @@ def test_reversed(text: str) -> None:
 def test_getitem_slice_positive_start_stop(text: str, start: int, stop: int) -> None:
     result = LeanStr(text)[start:stop]
     assert str(result) == text[start:stop]
-    result = LeanStr(text)[start:stop]
-    assert str(result) == text[start:stop]
 
 
 @mark.parametrize(
