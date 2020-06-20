@@ -68,15 +68,14 @@ def test_len(text: str) -> None:
 @mark.parametrize(
     'text, index',
     [
-        ('ação', 0),
-        ('ação', 1),
-        ('ação', 2),
-        ('ação', 3),
-        ('ação', -1),
-        ('ação', -2),
-        ('ação', -3),
-        ('ação', -4),
-        ('axé', -1),
+        ('Šedivý', 0),
+        ('Šedivý', 1),
+        ('Šedivý', 2),
+        ('Šedivý', 3),
+        ('Šedivý', -1),
+        ('Šedivý', -2),
+        ('Šedivý', -3),
+        ('Šedivý', -4),
     ],
 )
 def test_getitem(text: str, index: int) -> None:
@@ -99,12 +98,12 @@ def test_reversed(text: str) -> None:
 @mark.parametrize(
     'text, start, stop', 
     [
-        ('curió', 1, 3),
-        ('curió', 1, 3),
-        ('curió', None, 3),
-        ('curió', 2, None),
-        ('curió', 2, 2),
-        ('curió', 2, 1),
+        ('Šedivý', 1, 3),
+        ('Šedivý', 1, 3),
+        ('Šedivý', None, 3),
+        ('Šedivý', 2, None),
+        ('Šedivý', 2, 2),
+        ('Šedivý', 2, 1),
     ],
 )
 def test_getitem_slice_positive_start_stop(text: str, start: int, stop: int) -> None:
