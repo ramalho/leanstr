@@ -60,7 +60,6 @@ class LeanStr:
                     end = len(data)
                 yield data[i : end].decode('utf8')
 
-
     def __len__(self):
         result = 0
         for i, _ in self._iter_indices():
