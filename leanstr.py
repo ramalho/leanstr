@@ -1,6 +1,6 @@
 import itertools
 from collections import abc
-from typing import Iterator, NamedTuple, Optional, NewType
+from typing import Iterator, NamedTuple, Optional, NewType, Union
 from typing import overload
 
 Offset = NewType('Offset', int)
@@ -93,18 +93,23 @@ class LeanStr(abc.Sequence):
             char_index += step
         return None
 
+    def _getslice(self, key: slice) -> 'LeanStr':
+        # This was easy to do but a custom implementation should be faster:
+        # lots of needless iteration, copying & encoding/decoding under the covers.
+        try:
+            iterator = itertools.islice(self, key.start, key.stop, key.step)
+            return LeanStr(''.join(iterator))
+        except ValueError:
+            raise ValueError('start, stop, and step must be None or an'
+                             ' integer: 0 <= x <= sys.maxsize.') from None
+
     @overload
     def __getitem__(self, i: int) -> str: ...
     @overload
     def __getitem__(self, s: slice) -> 'LeanStr': ...
-    def __getitem__(self, key):
+    def __getitem__(self, key: Union[int, slice]) -> Union[str, 'LeanStr']:
         if isinstance(key, slice):
-            # this was easy to do but a custom implementation should be faster
-            try:
-                return ''.join(itertools.islice(self, key.start, key.stop, key.step))
-            except ValueError:
-                raise ValueError('start, stop, and step must be None or an'
-                                 ' integer: 0 <= x <= sys.maxsize.') from None
+            return self._getslice(key)
         start = 0 if key >= 0 else -1
         result = self._scan(key, start)
         if result is None:
