@@ -49,6 +49,18 @@ class LeanStr:
         for i, width in self._iter_indices():
             yield data[i : i + width].decode('utf8')
 
+    def __reversed__(self) -> Iterator[str]:
+        data = self.data
+        for i, width in self._iter_indices_reverse():
+            if width == 1:
+                yield chr(data[i])
+            else:
+                end = i + width
+                if end == 0:
+                    end = len(data)
+                yield data[i : end].decode('utf8')
+
+
     def __len__(self):
         result = 0
         for i, _ in self._iter_indices():
@@ -77,4 +89,7 @@ class LeanStr:
             raise IndexError('index out of range')
         if width == 1:
             return chr(self.data[i])
-        return self.data[i : i + width].decode('utf8')
+        end = i + width
+        if end == 0:
+            end = len(self.data)
+        return self.data[i : end].decode('utf8')

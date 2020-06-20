@@ -12,6 +12,7 @@ FACE = '\N{GRINNING FACE}'
     'text, expected',
     [
         ('A', [(0, 1)]),
+        ('é', [(0, 2)]),
         ('abc', [(0, 1), (1, 1), (2, 1)]),
         ('não', [(0, 1), (1, 2), (3, 1)]),
         (ALAF, [(0, 3)]),
@@ -30,6 +31,7 @@ def test_iter_indices(text, expected) -> None:
     'text, expected',
     [
         ('A', [(-1, 1)]),
+        ('é', [(-2, 2)]),
         ('abc', [(-1, 1), (-2, 1), (-3, 1)]),
         ('não', [(-1, 1), (-3, 2), (-4, 1)]),
         (ALAF, [(-3, 3)]),
@@ -67,6 +69,7 @@ def test_len(text) -> None:
         ('ação', -2),
         ('ação', -3),
         ('ação', -4),
+        ('axé', -1),
     ],
 )
 def test_get_char(text, index) -> None:
@@ -85,3 +88,9 @@ def test_get_char(text, index) -> None:
 def test_get_char_out_of_range(text, index) -> None:
     with raises(IndexError, match='index out of range'):
         print(LeanStr(text)[index])
+
+
+@mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
+def test_reversed(text) -> None:
+    result = list(reversed(LeanStr(text)))
+    assert result == list(reversed(text))
