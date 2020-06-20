@@ -14,7 +14,7 @@ If a string has only Latin-1 characters (up to U+00FF),
 then every character will be stored in a 1-byte cell.
 
 If a string is not just Latin-1 but has only characters in the Unicode
-_Basic Multilingual Plane (BMP)_ (up to U+FFF),
+_Basic Multilingual Plane_ (up to U+FFFF),
 then every character will be stored in a 2-byte cell.
 
 Otherwise, every character will be stored in a 4-byte cell.
