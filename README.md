@@ -19,7 +19,7 @@ then every character will be stored in a 2-byte cell.
 
 Otherwise, every character will be stored in a 4-byte cell.
 
-This means that a long text in Latin-1 can use 4x the RAM if a
+This means that text in Latin-1 can use 4x the RAM if a
 single 🐜 (ant character, U+1F41C) is placed in the text.
 
 Given the popularity of Emoji these days, it's interesting to explore the pros and cons
@@ -27,11 +27,13 @@ of storing strings as bytes encoded in UTF-8, which is how it's done in the Go l
 
 In UTF-8, each character is stored in a sequence of 1, 2, 3, or 4 bytes,
 depending on the bit width of its codepoint.
+This potentially saves a lot memory when a few Emoji are used in a large text.
 
-This potentially saves a lot memory when Emoji are used, but introduces
-processing costs, because characters use different-sized byte sequences.
-Random access becomes O(n)—requiring iterating
-from the start or the end of the byte storage, depending on the sign of the index.
+However, it introduces significant processing costs for some operations,
+because characters use different-sized byte sequences.
+Random access becomes O(n)—requiring iteration
+from the start or the end of the byte storage,
+depending on the sign of the index.
 
 This repo has a proof-of-concept implementing a `LeanStr` class with
 `__iter__`, `__reversed__`, `__len__` and `__getitem__`.

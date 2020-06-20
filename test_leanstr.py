@@ -54,8 +54,13 @@ def test_iter(text) -> None:
 
 @mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
 def test_len(text) -> None:
-    result = len(LeanStr(text))
+    my_str = LeanStr(text)
+    result = len(my_str)
+    # test cache
+    my_str._data = bytes() 
+    result2 = len(my_str)  # test cache
     assert result == len(text)
+    assert result == result2
 
 
 @mark.parametrize(

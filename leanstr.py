@@ -9,10 +9,11 @@ class IndexWidth(NamedTuple):
 
 class LeanStr:
     def __init__(self, seq: str):
-        self.data: bytes = seq.encode('utf8')
+        self._data: bytes = seq.encode('utf8')
+        self._length = -1  # for caching
 
     def _iter_indices(self) -> Iterator[IndexWidth]:
-        data = self.data
+        data = self._data
         i = 0
         while i < len(data):
             byte = data[i]
@@ -28,7 +29,7 @@ class LeanStr:
             i += width
 
     def _iter_indices_reverse(self) -> Iterator[IndexWidth]:
-        data = self.data
+        data = self._data
         i = -1
         width = 0
         while i >= -len(data):
@@ -45,12 +46,12 @@ class LeanStr:
             width = 0
 
     def __iter__(self) -> Iterator[str]:
-        data = self.data
+        data = self._data
         for i, width in self._iter_indices():
             yield data[i : i + width].decode('utf8')
 
     def __reversed__(self) -> Iterator[str]:
-        data = self.data
+        data = self._data
         for i, width in self._iter_indices_reverse():
             if width == 1:
                 yield chr(data[i])
@@ -61,9 +62,12 @@ class LeanStr:
                 yield data[i:end].decode('utf8')
 
     def __len__(self):
+        if self._length >= 0:
+            return self._length
         result = 0
         for i, _ in self._iter_indices():
             result += 1
+        self._length = result
         return result
 
     def __getitem__(self, key):
@@ -87,8 +91,8 @@ class LeanStr:
         if not found:
             raise IndexError('index out of range')
         if width == 1:
-            return chr(self.data[i])
+            return chr(self._data[i])
         end = i + width
         if end == 0:
-            end = len(self.data)
-        return self.data[i:end].decode('utf8')
+            end = len(self._data)
+        return self._data[i:end].decode('utf8')
