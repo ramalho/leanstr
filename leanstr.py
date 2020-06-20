@@ -58,7 +58,7 @@ class LeanStr:
                 end = i + width
                 if end == 0:
                     end = len(data)
-                yield data[i : end].decode('utf8')
+                yield data[i:end].decode('utf8')
 
     def __len__(self):
         result = 0
@@ -91,4 +91,4 @@ class LeanStr:
         end = i + width
         if end == 0:
             end = len(self.data)
-        return self.data[i : end].decode('utf8')
+        return self.data[i:end].decode('utf8')

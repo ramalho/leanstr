@@ -78,12 +78,7 @@ def test_get_char(text, index) -> None:
 
 
 @mark.parametrize(
-    'text, index',
-    [
-        ('ace', 3),
-        ('ace', -4),
-        ('', 0),
-    ],
+    'text, index', [('ace', 3), ('ace', -4), ('', 0),],
 )
 def test_get_char_out_of_range(text, index) -> None:
     with raises(IndexError, match='index out of range'):
