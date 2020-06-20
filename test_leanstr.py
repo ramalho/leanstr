@@ -58,7 +58,7 @@ def test_len(text) -> None:
     result = len(my_str)
     # test cache
     my_str._data = bytes() 
-    result2 = len(my_str)  # test cache
+    result2 = len(my_str)
     assert result == len(text)
     assert result == result2
 
