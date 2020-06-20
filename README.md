@@ -41,4 +41,4 @@ Of course, any performance-oriented replacement for Python's
 
 This is just me playing with the internals of UTF-8.
 
--LR
+• LR 🤓
