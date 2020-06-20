@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 from pytest import mark, raises  # type: ignore
 
 from leanstr import LeanStr
@@ -22,7 +24,7 @@ FACE = '\N{GRINNING FACE}'
         ('', []),
     ],
 )
-def test_iter_indices(text, expected) -> None:
+def test_iter_indices(text: str, expected: List[Tuple[int, int]]) -> None:
     result = list(LeanStr(text)._iter_indices())
     assert result == expected
 
@@ -41,23 +43,23 @@ def test_iter_indices(text, expected) -> None:
         ('', []),
     ],
 )
-def test_iter_indices_reverse(text, expected) -> None:
+def test_iter_indices_reverse(text: str, expected: List[int]) -> None:
     result = list(LeanStr(text)._iter_indices_reverse())
     assert result == expected
 
 
 @mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
-def test_iter(text) -> None:
+def test_iter(text: str) -> None:
     result = list(LeanStr(text))
     assert result == list(text)
 
 
 @mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
-def test_len(text) -> None:
+def test_len(text: str) -> None:
     my_str = LeanStr(text)
     result = len(my_str)
     # test cache
-    my_str._data = bytes() 
+    my_str._data = bytes()
     result2 = len(my_str)
     assert result == len(text)
     assert result == result2
@@ -77,7 +79,7 @@ def test_len(text) -> None:
         ('axé', -1),
     ],
 )
-def test_get_char(text, index) -> None:
+def test_get_char(text: str, index: int) -> None:
     result = LeanStr(text)[index]
     assert result == text[index]
 
@@ -85,12 +87,12 @@ def test_get_char(text, index) -> None:
 @mark.parametrize(
     'text, index', [('ace', 3), ('ace', -4), ('', 0),],
 )
-def test_get_char_out_of_range(text, index) -> None:
+def test_get_char_out_of_range(text: str, index: int) -> None:
     with raises(IndexError, match='index out of range'):
         print(LeanStr(text)[index])
 
 
 @mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
-def test_reversed(text) -> None:
+def test_reversed(text: str) -> None:
     result = list(reversed(LeanStr(text)))
     assert result == list(reversed(text))
