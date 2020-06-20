@@ -1,5 +1,7 @@
-from collections import UserString
-from typing import Iterator, NamedTuple, Optional, NewType, cast
+import itertools
+from collections import abc
+from typing import Iterator, NamedTuple, Optional, NewType
+from typing import overload
 
 Offset = NewType('Offset', int)
 
@@ -9,12 +11,16 @@ class OffsetWidth(NamedTuple):
     width: int
 
 
-class LeanStr:
+class LeanStr(abc.Sequence):
     def __init__(self, seq: str) -> None:
         self._data = seq.encode('utf8')
         self._length = -1  # for caching
 
+    def __str__(self) -> str:
+        return self._data.decode('utf8')
+
     def _iter_indices(self) -> Iterator[OffsetWidth]:
+        # this assumes UTF-8 encoding
         data = self._data
         offset = 0
         while offset < len(data):
@@ -30,7 +36,8 @@ class LeanStr:
             yield OffsetWidth(Offset(offset), width)
             offset += width
 
-    def _iter_indices_reverse(self) -> Iterator[OffsetWidth]:
+    def _reversed_indices(self) -> Iterator[OffsetWidth]:
+        # this assumes UTF-8 encoding
         data = self._data
         offset = -1
         width = 0
@@ -54,7 +61,7 @@ class LeanStr:
 
     def __reversed__(self) -> Iterator[str]:
         data = self._data
-        for i, width in self._iter_indices_reverse():
+        for i, width in self._reversed_indices():
             if width == 1:
                 yield chr(data[i])
             else:
@@ -77,7 +84,7 @@ class LeanStr:
             iterator = self._iter_indices()
             step = 1
         else:
-            iterator = self._iter_indices_reverse()
+            iterator = self._reversed_indices()
             step = -1
         char_index = start
         for offset_width in iterator:
@@ -86,9 +93,18 @@ class LeanStr:
             char_index += step
         return None
 
-    def __getitem__(self, key: int) -> str:
+    @overload
+    def __getitem__(self, i: int) -> str: ...
+    @overload
+    def __getitem__(self, s: slice) -> 'LeanStr': ...
+    def __getitem__(self, key):
         if isinstance(key, slice):
-            raise NotImplementedError('slices not supported')
+            # this was easy to do but a custom implementation should be faster
+            try:
+                return ''.join(itertools.islice(self, key.start, key.stop, key.step))
+            except ValueError:
+                raise ValueError('start, stop, and step must be None or an'
+                                 ' integer: 0 <= x <= sys.maxsize.') from None
         start = 0 if key >= 0 else -1
         result = self._scan(key, start)
         if result is None:

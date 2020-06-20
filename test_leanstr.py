@@ -43,8 +43,8 @@ def test_iter_indices(text: str, expected: List[Tuple[int, int]]) -> None:
         ('', []),
     ],
 )
-def test_iter_indices_reverse(text: str, expected: List[int]) -> None:
-    result = list(LeanStr(text)._iter_indices_reverse())
+def test_iter_reversed_indices(text: str, expected: List[int]) -> None:
+    result = list(LeanStr(text)._reversed_indices())
     assert result == expected
 
 
@@ -79,20 +79,50 @@ def test_len(text: str) -> None:
         ('axé', -1),
     ],
 )
-def test_get_char(text: str, index: int) -> None:
+def test_getitem(text: str, index: int) -> None:
     result = LeanStr(text)[index]
     assert result == text[index]
-
 
 @mark.parametrize(
     'text, index', [('ace', 3), ('ace', -4), ('', 0),],
 )
-def test_get_char_out_of_range(text: str, index: int) -> None:
+def test_getitem_out_of_range(text: str, index: int) -> None:
     with raises(IndexError, match='index out of range'):
         print(LeanStr(text)[index])
-
 
 @mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
 def test_reversed(text: str) -> None:
     result = list(reversed(LeanStr(text)))
     assert result == list(reversed(text))
+
+
+@mark.parametrize(
+    'text, start, stop', 
+    [
+        ('curió', 1, 3),
+        ('curió', 1, 3),
+        ('curió', None, 3),
+        ('curió', 2, None),
+        ('curió', 2, 2),
+        ('curió', 2, 1),
+    ],
+)
+def test_getitem_slice_positive_start_stop(text: str, start: int, stop: int) -> None:
+    result = LeanStr(text)[start:stop]
+    assert str(result) == text[start:stop]
+    result = LeanStr(text)[start:stop]
+    assert str(result) == text[start:stop]
+
+
+@mark.parametrize(
+    'start, stop', 
+    [
+        (-3, -1),
+        (-3, None),
+        (None, -3),
+    ],
+)
+def test_getitem_slice_negatives_not_supported(start: int, stop: int) -> None:
+    with raises(ValueError, match='start, stop, and step must be None or an integer'):
+        print(LeanStr('whatever')[-3:-1])
+
