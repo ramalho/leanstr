@@ -6,7 +6,7 @@ using UTF-8 internally.
 
 ## What is this about
 
-Since [PEP 393 -- Flexible String Representation](https://www.python.org/dev/peps/pep-0393/)
+Since [PEP 393—Flexible String Representation](https://www.python.org/dev/peps/pep-0393/)
 was implemented in Python 3.3, Unicode strings are stored as sequences of _cells_
 that can be 1, 2, or 4 bytes wide, depending on the content of the string.
 
@@ -35,3 +35,8 @@ from the start or the end of the byte storage, depending on the sign of the inde
 
 This repo has a proof-of-concept implementing a `LeanStr` class with
 `__iter__`, `__reversed__`, `__len__` and `__getitem__`.
+
+Of course, any performance-oriented replacement for Python's
+`str` class would have to be implemented in a language like C or Rust.
+
+This is just me playing with the internals of UTF-8.
