@@ -40,3 +40,5 @@ Of course, any performance-oriented replacement for Python's
 `str` class would have to be implemented in a language like C or Rust.
 
 This is just me playing with the internals of UTF-8.
+
+-LR
