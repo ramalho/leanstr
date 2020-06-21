@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 from pytest import mark, raises  # type: ignore
 
-from leanstr import LeanStr
+from leanstr import LeanStr, OffsetWidth, Offset, OffsetError
 
 ALAF = '\N{SAMARITAN LETTER ALAF}'
 ROOK = '\N{BLACK CHESS ROOK}'
@@ -13,8 +13,8 @@ FACE = '\N{GRINNING FACE}'
 @mark.parametrize(
     'text, expected',
     [
-        ('A', [(0, 1)]),
-        ('é', [(0, 2)]),
+        ('A', [OffsetWidth(offset=Offset(0), width=1)]),
+        ('é', [OffsetWidth(offset=Offset(0), width=2)]),
         ('abc', [(0, 1), (1, 1), (2, 1)]),
         ('não', [(0, 1), (1, 2), (3, 1)]),
         (ALAF, [(0, 3)]),
@@ -22,11 +22,37 @@ FACE = '\N{GRINNING FACE}'
         (LBSA, [(0, 4)]),
         ('a' + FACE + 'z', [(0, 1), (1, 4), (5, 1)]),
         ('', []),
-    ],
+        ('éphéméréité', [
+                (0, 2), (2, 1), (3, 1), (4, 2), (6, 1), (7, 2),
+                (9, 1), (10, 2), (12, 1), (13, 1), (14, 2),
+            ]
+        ),
+    ]
 )
 def test_iter_indices(text: str, expected: List[Tuple[int, int]]) -> None:
     result = list(LeanStr(text)._iter_indices())
     assert result == expected
+
+
+@mark.parametrize(
+    'text, offset, expected',
+    [
+        ('éphéméréité', 0, [
+                (0, 2), (2, 1), (3, 1), (4, 2), (6, 1), (7, 2),
+                (9, 1), (10, 2), (12, 1), (13, 1), (14, 2),
+            ]
+        ),
+        ('éphéméréité', 10, [(10, 2), (12, 1), (13, 1), (14, 2)] ),
+        ('éphéméréité', 14, [(14, 2)]),
+    ]
+)
+def test_iter_indices_offset(text: str, offset: int, expected: List[Tuple[int, int]]) -> None:
+    result = list(LeanStr(text)._iter_indices(Offset(offset)))
+    assert result == expected
+
+def test_iter_indices_offset_error() -> None:
+    with raises(OffsetError, match='offset 15: trailing UTF-8 byte'):
+        print(list(LeanStr('éphéméréité')._iter_indices(Offset(15))))
 
 
 @mark.parametrize(
@@ -108,7 +134,7 @@ def test_reversed(text: str) -> None:
 )
 def test_getitem_slice_positive_start_stop(text: str, start: int, stop: int) -> None:
     result = LeanStr(text)[start:stop]
-    assert str(result) == text[start:stop]
+    assert text[start:stop] == str(result)
 
 
 @mark.parametrize(
@@ -123,3 +149,7 @@ def test_getitem_slice_negatives_not_supported(start: int, stop: int) -> None:
     with raises(ValueError, match='start, stop, and step must be None or an integer'):
         print(LeanStr('whatever')[-3:-1])
 
+
+def test_getitem_slice_step() -> None:
+    with raises(NotImplementedError, match='slice step is not implemented'):
+        print(LeanStr('whatever')[::3])

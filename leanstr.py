@@ -1,32 +1,46 @@
-import itertools
 from collections import abc
+import itertools
+import sys
 from typing import Iterator, NamedTuple, Optional, NewType, Union
 from typing import overload
 
 Offset = NewType('Offset', int)
 
 
+class OffsetError(UnicodeError):
+    def __init__(self, offset: Offset):
+        self.offset = offset
+    def __str__(self) -> str:
+        return f'offset {self.offset}: trailing UTF-8 byte'
+
+
 class OffsetWidth(NamedTuple):
-    idx: Offset
+    offset: Offset
     width: int
 
 
 class LeanStr(abc.Sequence):
-    def __init__(self, seq: str) -> None:
-        self._data = seq.encode('utf8')
+    def __init__(self, seq: str = '', *, data: bytes = b'') -> None:
+        if seq and data:
+            ValueError('please provide seq:str or data:bytes, not both')
+        if seq:
+            self._data = seq.encode('utf8')
+        else:
+            self._data = data
         self._length = -1  # for caching
 
     def __str__(self) -> str:
         return self._data.decode('utf8')
 
-    def _iter_indices(self) -> Iterator[OffsetWidth]:
+    def _iter_indices(self, offset:Offset = Offset(0)) -> Iterator[OffsetWidth]:
         # this assumes UTF-8 encoding
         data = self._data
-        offset = 0
         while offset < len(data):
             byte = data[offset]
-            if byte < 0b11000000:
+            if byte < 128:
                 width = 1
+            elif byte < 0b11000000:
+                raise OffsetError(offset)
             elif byte < 0b11100000:
                 width = 2
             elif byte < 0b11110000:
@@ -34,7 +48,7 @@ class LeanStr(abc.Sequence):
             else:
                 width = 4
             yield OffsetWidth(Offset(offset), width)
-            offset += width
+            offset = Offset(offset + width)
 
     def _reversed_indices(self) -> Iterator[OffsetWidth]:
         # this assumes UTF-8 encoding
@@ -79,7 +93,7 @@ class LeanStr(abc.Sequence):
         self._length = result
         return result
 
-    def _scan(self, key: int, start: int) -> Optional[OffsetWidth]:
+    def _scan(self, key: int, start: int, offset: Offset = Offset(0)) -> Optional[OffsetWidth]:
         if start == 0:
             iterator = self._iter_indices()
             step = 1
@@ -94,14 +108,18 @@ class LeanStr(abc.Sequence):
         return None
 
     def _getslice(self, key: slice) -> 'LeanStr':
-        # This was easy to do but a custom implementation should be faster:
-        # lots of needless iteration, copying & encoding/decoding under the covers.
-        try:
-            iterator = itertools.islice(self, key.start, key.stop, key.step)
-            return LeanStr(''.join(iterator))
-        except ValueError:
+        if key.step is not None:
+            raise NotImplementedError('slice step is not implemented')
+        if ((key.start is not None and key.start < 0)
+            or (key.stop is not None and key.stop < 0)):
             raise ValueError('start, stop, and step must be None or an'
-                             ' integer: 0 <= x <= sys.maxsize.') from None
+                             ' integer: 0 <= x <= sys.maxsize.')
+        key_start = 0 if key.start is None else key.start
+        start_offset, _ = self._scan(key_start, 0)
+        if key.stop is None:
+            return LeanStr(data=self._data[start_offset:])
+        stop_offset, _ = self._scan(key.stop, 0, start_offset)
+        return LeanStr(data=self._data[start_offset:stop_offset])
 
     @overload
     def __getitem__(self, i: int) -> str: ...
