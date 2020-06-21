@@ -146,7 +146,7 @@ def test_getitem_slice_positive_start_stop(text: str, start: int, stop: int) -> 
     ],
 )
 def test_getitem_slice_negatives_not_supported(start: int, stop: int) -> None:
-    with raises(ValueError, match='start, stop, and step must be None or an integer'):
+    with raises(ValueError, match='start and stop must be None or an integer'):
         print(LeanStr('whatever')[-3:-1])
 
 

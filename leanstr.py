@@ -93,7 +93,7 @@ class LeanStr(abc.Sequence):
         self._length = result
         return result
 
-    def _scan(self, key: int, start: int, offset: Offset = Offset(0)) -> Optional[OffsetWidth]:
+    def _scan(self, key: int, start: int, offset: Offset = Offset(0)) -> OffsetWidth:
         if start == 0:
             iterator = self._iter_indices()
             step = 1
@@ -105,17 +105,19 @@ class LeanStr(abc.Sequence):
             if char_index == key:
                 return offset_width
             char_index += step
-        return None
+        raise IndexError(f'index out of range: {key}')
 
     def _getslice(self, key: slice) -> 'LeanStr':
         if key.step is not None:
             raise NotImplementedError('slice step is not implemented')
         if ((key.start is not None and key.start < 0)
             or (key.stop is not None and key.stop < 0)):
-            raise ValueError('start, stop, and step must be None or an'
+            raise ValueError('start and stop must be None or an'
                              ' integer: 0 <= x <= sys.maxsize.')
-        key_start = 0 if key.start is None else key.start
-        start_offset, _ = self._scan(key_start, 0)
+        if key.start is None:
+            start_offset = Offset(0)
+        else:
+            start_offset, _ = self._scan(key.start, 0)
         if key.stop is None:
             return LeanStr(data=self._data[start_offset:])
         stop_offset, _ = self._scan(key.stop, 0, start_offset)
@@ -129,10 +131,7 @@ class LeanStr(abc.Sequence):
         if isinstance(key, slice):
             return self._getslice(key)
         start = 0 if key >= 0 else -1
-        result = self._scan(key, start)
-        if result is None:
-            raise IndexError('index out of range')
-        offset, width = result
+        offset, width = self._scan(key, start)
         if width == 1:
             return chr(self._data[offset])
         end = offset + width
