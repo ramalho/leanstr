@@ -22,42 +22,50 @@ FACE = '\N{GRINNING FACE}'
         (LBSA, [(0, 4)]),
         ('a' + FACE + 'z', [(0, 1), (1, 4), (5, 1)]),
         ('', []),
-        ('éphéméréité', [
-                (0, 2), (2, 1), (3, 1), (4, 2), (6, 1), (7, 2),
-                (9, 1), (10, 2), (12, 1), (13, 1), (14, 2),
-            ]
+        (
+            'éphéméréité',
+            [
+                (0, 2),
+                (2, 1),
+                (3, 1),
+                (4, 2),
+                (6, 1),
+                (7, 2),
+                (9, 1),
+                (10, 2),
+                (12, 1),
+                (13, 1),
+                (14, 2),
+            ],
         ),
-    ]
+    ],
 )
 def test_iter_indices(text: str, expected: List[Tuple[int, int]]) -> None:
     result = list(LeanStr(text)._iter_indices())
     assert result == expected
 
 
-@mark.parametrize(
-    'text, offset, expected',
-    [
+@mark.parametrize('text, offset, expected', [
         ('éphéméréité', 0, [
                 (0, 2), (2, 1), (3, 1), (4, 2), (6, 1), (7, 2),
-                (9, 1), (10, 2), (12, 1), (13, 1), (14, 2),
-            ]
-        ),
-        ('éphéméréité', 10, [(10, 2), (12, 1), (13, 1), (14, 2)] ),
+                (9, 1), (10, 2), (12, 1), (13, 1), (14, 2)]),
+        ('éphéméréité', 10, [(10, 2), (12, 1), (13, 1), (14, 2)]),
         ('éphéméréité', 14, [(14, 2)]),
-    ]
+    ],
 )
-def test_iter_indices_offset(text: str, offset: int, expected: List[Tuple[int, int]]) -> None:
+def test_iter_indices_offset(
+    text: str, offset: int, expected: List[Tuple[int, int]]
+) -> None:
     result = list(LeanStr(text)._iter_indices(Offset(offset)))
     assert result == expected
+
 
 def test_iter_indices_offset_error() -> None:
     with raises(OffsetError, match='offset 15: trailing UTF-8 byte'):
         print(list(LeanStr('éphéméréité')._iter_indices(Offset(15))))
 
 
-@mark.parametrize(
-    'text, expected',
-    [
+@mark.parametrize('text, expected', [
         ('A', [(-1, 1)]),
         ('é', [(-2, 2)]),
         ('abc', [(-1, 1), (-2, 1), (-3, 1)]),
@@ -91,9 +99,7 @@ def test_len(text: str) -> None:
     assert result == result2
 
 
-@mark.parametrize(
-    'text, index',
-    [
+@mark.parametrize('text, index', [
         ('Šedivý', 0),
         ('Šedivý', 1),
         ('Šedivý', 2),
@@ -108,12 +114,14 @@ def test_getitem(text: str, index: int) -> None:
     result = LeanStr(text)[index]
     assert result == text[index]
 
+
 @mark.parametrize(
-    'text, index', [('ace', 3), ('ace', -4), ('', 0),],
+    'text, index', [('ace', 3), ('ace', -4), ('', 0)]
 )
 def test_getitem_out_of_range(text: str, index: int) -> None:
     with raises(IndexError, match='index out of range'):
         print(LeanStr(text)[index])
+
 
 @mark.parametrize('text', ['A', 'abc', 'não', ALAF, LBSA, ROOK + FACE, ''])
 def test_reversed(text: str) -> None:
@@ -121,9 +129,7 @@ def test_reversed(text: str) -> None:
     assert result == list(reversed(text))
 
 
-@mark.parametrize(
-    'text, start, stop', 
-    [
+@mark.parametrize('text, start, stop', [
         ('Šedivý', 1, 3),
         ('Šedivý', 1, 3),
         ('Šedivý', None, 3),
@@ -137,14 +143,7 @@ def test_getitem_slice_positive_start_stop(text: str, start: int, stop: int) -> 
     assert text[start:stop] == str(result)
 
 
-@mark.parametrize(
-    'start, stop', 
-    [
-        (-3, -1),
-        (-3, None),
-        (None, -3),
-    ],
-)
+@mark.parametrize('start, stop', [(-3, -1), (-3, None), (None, -3)])
 def test_getitem_slice_negatives_not_supported(start: int, stop: int) -> None:
     with raises(ValueError, match='start and stop must be None or an integer'):
         print(LeanStr('whatever')[-3:-1])

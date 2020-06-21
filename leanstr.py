@@ -1,7 +1,5 @@
 from collections import abc
-import itertools
-import sys
-from typing import Iterator, NamedTuple, Optional, NewType, Union
+from typing import Iterator, NamedTuple, NewType, Union
 from typing import overload
 
 Offset = NewType('Offset', int)
@@ -10,6 +8,7 @@ Offset = NewType('Offset', int)
 class OffsetError(UnicodeError):
     def __init__(self, offset: Offset):
         self.offset = offset
+
     def __str__(self) -> str:
         return f'offset {self.offset}: trailing UTF-8 byte'
 
@@ -32,7 +31,7 @@ class LeanStr(abc.Sequence):
     def __str__(self) -> str:
         return self._data.decode('utf8')
 
-    def _iter_indices(self, offset:Offset = Offset(0)) -> Iterator[OffsetWidth]:
+    def _iter_indices(self, offset: Offset = Offset(0)) -> Iterator[OffsetWidth]:
         # this assumes UTF-8 encoding
         data = self._data
         while offset < len(data):
@@ -110,8 +109,9 @@ class LeanStr(abc.Sequence):
     def _getslice(self, key: slice) -> 'LeanStr':
         if key.step is not None:
             raise NotImplementedError('slice step is not implemented')
-        if ((key.start is not None and key.start < 0)
-            or (key.stop is not None and key.stop < 0)):
+        if (key.start is not None and key.start < 0) or (
+            key.stop is not None and key.stop < 0
+        ):
             raise ValueError('start and stop must be None or an'
                              ' integer: 0 <= x <= sys.maxsize.')
         if key.start is None:
@@ -124,9 +124,13 @@ class LeanStr(abc.Sequence):
         return LeanStr(data=self._data[start_offset:stop_offset])
 
     @overload
-    def __getitem__(self, i: int) -> str: ...
+    def __getitem__(self, i: int) -> str:
+        ...
+
     @overload
-    def __getitem__(self, s: slice) -> 'LeanStr': ...
+    def __getitem__(self, s: slice) -> 'LeanStr':
+        ...
+
     def __getitem__(self, key: Union[int, slice]) -> Union[str, 'LeanStr']:
         if isinstance(key, slice):
             return self._getslice(key)
