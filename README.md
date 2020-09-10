@@ -19,8 +19,8 @@ then each and every character will be stored in a 2-byte cell.
 
 Otherwise, each and every character will be stored in a 4-byte cell.
 
-PEP 393 means that, when a single 🐜 (ant character, U+1F41C) is appears
-somewhere a long Latin-1 text, suddenly 4 times the amount of RAM will be required!
+PEP 393 means that a long Latin-1 text can take 4x as much RAM if
+it includes a single 🐜 (ant character, U+1F41C—not within the BMP).
 
 Given the popularity of Emoji these days, it's interesting to explore the pros and cons
 of storing strings as bytes encoded in UTF-8, which is how it's done in the Go language.
