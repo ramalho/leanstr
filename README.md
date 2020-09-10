@@ -11,25 +11,25 @@ was implemented in Python 3.3, Unicode strings are stored as sequences of _cells
 that can be 1, 2, or 4 bytes wide, depending on the content of the string.
 
 If a string has only Latin-1 characters (up to U+00FF),
-then every character will be stored in a 1-byte cell.
+then each character will be stored in a 1-byte cell.
 
-If a string is not just Latin-1 but has only characters in the Unicode
-_Basic Multilingual Plane_ (up to U+FFFF),
-then every character will be stored in a 2-byte cell.
+If a string is not just Latin-1 but has characters from the Unicode
+BMP—_Basic Multilingual Plane_ (up to U+FFFF),
+then each and every character will be stored in a 2-byte cell.
 
-Otherwise, every character will be stored in a 4-byte cell.
+Otherwise, each and every character will be stored in a 4-byte cell.
 
-This means that text in Latin-1 can use 4x the RAM if a
-single 🐜 (ant character, U+1F41C) is placed in the text.
+PEP 393 means that, when a single 🐜 (ant character, U+1F41C) is appears
+somewhere a long Latin-1 text, suddenly 4 times the amount of RAM will be required!
 
 Given the popularity of Emoji these days, it's interesting to explore the pros and cons
 of storing strings as bytes encoded in UTF-8, which is how it's done in the Go language.
 
-In UTF-8, each character is stored in a sequence of 1, 2, 3, or 4 bytes,
-depending on the bit width of its codepoint.
-This potentially saves a lot memory when a few Emoji are used in a large text.
+In UTF-8, ASCII characters use only 1 byte, and the rest of Unicode uses sequences of 2, 3, or 4 bytes,
+depending on the bit width of the character's code point.
+This potentially saves a lot memory when a few Emoji are used in a large Latin-1 or BMP text.
 
-However, it introduces significant processing costs for some operations,
+However, UTF-8 introduces significant processing costs for some operations,
 because characters use different-sized byte sequences.
 Random access becomes O(n)—requiring iteration
 from the start or the end of the byte storage,
