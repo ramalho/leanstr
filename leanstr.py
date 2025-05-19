@@ -25,7 +25,7 @@ class LeanStr(abc.Sequence):
         if seq:
             self._data = seq.encode('utf8')
         else:
-            self._data = data
+            self._data = bytes(data)
         self._length = -1  # for caching
 
     def __str__(self) -> str:
